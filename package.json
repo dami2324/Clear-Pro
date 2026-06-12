@@ -1,7 +1,7 @@
 {
   "name": "clearpro",
-  "version": "1.0.0",
-  "description": "ClearPro - limpiador de PC/Mac y liberador de espacio para Windows y macOS.",
+  "version": "1.0.1",
+  "description": "Limpiador de PC",
   "main": "src/main/main.js",
   "author": "ClearPro",
   "license": "MIT",

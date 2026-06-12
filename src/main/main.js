@@ -182,7 +182,12 @@ function configureAutoUpdater() {
     setUpdateState({ status: 'downloaded', message: 'downloaded', version: info.version, percent: 100, error: null });
   });
   autoUpdater.on('error', (error) => {
-    setUpdateState({ status: 'error', message: 'error', error: error.message || String(error), percent: 0 });
+    const errorMsg = error.message || String(error);
+    if (errorMsg.includes('404') || errorMsg.includes('statusCode: 404') || errorMsg.includes('ERR_NAME_NOT_RESOLVED')) {
+      setUpdateState({ status: 'not-available', message: 'notAvailable', version: null, percent: 0, error: null });
+    } else {
+      setUpdateState({ status: 'error', message: 'error', error: errorMsg, percent: 0 });
+    }
     log.warn('Auto-update error', error);
   });
 }

@@ -454,14 +454,18 @@ function switchView(view) {
 }
 
 async function runScan() {
+  const btn = $('#scanButton');
+  if (btn) btn.disabled = true;
   setProgress(true, 10, t('preparing'));
-  await new Promise((resolve) => setTimeout(resolve, 180));
+  await new Promise((resolve) => setTimeout(resolve, 300));
   setProgress(true, 42, t('searching'));
+  await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 100)));
   state.scan = await window.clearpro.scan();
   setProgress(true, 100, t('previewReady'));
   renderScan();
-  await new Promise((resolve) => setTimeout(resolve, 350));
+  await new Promise((resolve) => setTimeout(resolve, 600));
   setProgress(false);
+  if (btn) btn.disabled = false;
   return state.scan;
 }
 
