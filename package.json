@@ -1,6 +1,6 @@
 {
   "name": "clearpro",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Limpiador de PC",
   "main": "src/main/main.js",
   "author": "ClearPro",
@@ -42,8 +42,7 @@
         "nsis"
       ],
       "artifactName": "ClearPro-Setup-${version}.${ext}",
-      "icon": "src/assets/icon.ico",
-      "signAndEditExecutable": false
+      "icon": "src/assets/icon.ico"
     },
     "nsis": {
       "oneClick": false,
