@@ -17,8 +17,8 @@ jobs:
       - name: Install Application
         run: |
           hdiutil attach ClearPro.dmg
-          cp -R "/Volumes/ClearPro 1.0.2/ClearPro.app" /Applications/
-          hdiutil detach "/Volumes/ClearPro 1.0.2"
+          cp -R /Volumes/ClearPro*/ClearPro.app /Applications/
+          hdiutil detach /Volumes/ClearPro*
           
       - name: Run Application
         run: |
