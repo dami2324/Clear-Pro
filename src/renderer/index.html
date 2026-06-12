@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClearPro</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <img class="brand-mark" src="../assets/icon.png" alt="ClearPro" />
+          <div>
+            <strong>ClearPro</strong>
+            <span data-i18n="brandSubtitle">Cleaner</span>
+          </div>
+        </div>
+        <nav class="nav">
+          <button class="nav-item active" data-view="dashboard" data-i18n="dashboard">Dashboard</button>
+          <button class="nav-item" data-view="scanner" data-i18n="scanner">Escaner</button>
+          <button class="nav-item" data-view="schedule" data-i18n="schedule">Programar</button>
+          <button class="nav-item" data-view="history" data-i18n="history">Historial</button>
+          <button class="nav-item" data-view="settings" data-i18n="settings">Configuracion</button>
+        </nav>
+        <div class="sidebar-footer">
+          <span data-i18n="health">Salud</span>
+          <strong id="sidebarScore">100</strong>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p id="eyebrow">Inicio</p>
+            <h1 id="viewTitle">Dashboard</h1>
+          </div>
+          <button id="quickClean" class="primary-button" data-i18n="cleanNow">Limpiar Ahora</button>
+        </header>
+
+        <section id="dashboard" class="view active">
+          <div class="hero-grid">
+            <div class="health-panel">
+              <div class="ring" id="healthRing"><span id="healthScore">100</span></div>
+              <div>
+                <h2 data-i18n="diskHealth">Salud del disco</h2>
+                <p id="scanSummary">Listo para escanear archivos temporales, caches y residuos.</p>
+              </div>
+            </div>
+            <div class="disk-panel">
+              <div class="panel-head">
+                <span data-i18n="diskUsage">Uso del disco</span>
+                <strong id="diskLabel">Calculando...</strong>
+              </div>
+              <div class="disk-bar"><span id="diskUsed"></span></div>
+              <div class="disk-meta">
+                <span id="diskBefore">Antes: --</span>
+                <span id="diskAfter">Despues: --</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <article><span data-i18n="today">Hoy</span><strong id="statToday">0 MB</strong></article>
+            <article><span data-i18n="week">Semana</span><strong id="statWeek">0 MB</strong></article>
+            <article><span data-i18n="month">Mes</span><strong id="statMonth">0 MB</strong></article>
+            <article><span data-i18n="lastCleanup">Ultima limpieza</span><strong id="lastCleaned">Nunca</strong></article>
+          </div>
+
+          <div class="analytics-grid">
+            <article class="chart-card">
+              <div class="panel-head">
+                <span data-i18n="recentFreed">Liberado reciente</span>
+                <strong id="trendTotal">0 MB</strong>
+              </div>
+              <canvas id="trendChart" width="620" height="230"></canvas>
+            </article>
+            <article class="chart-card">
+              <div class="panel-head">
+                <span data-i18n="junkByCategory">Basura por categoria</span>
+                <strong id="categoryTotal">0 MB</strong>
+              </div>
+              <div class="donut-layout">
+                <canvas id="categoryDonut" width="220" height="220"></canvas>
+                <div id="categoryLegend" class="legend-list"></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="progress-wrap hidden" id="progressWrap">
+            <div class="progress-head"><span id="progressText">Escaneando...</span><span id="progressPercent">0%</span></div>
+            <div class="progress"><span id="progressBar"></span></div>
+          </div>
+        </section>
+
+        <section id="scanner" class="view">
+          <div class="scanner-actions">
+            <button id="scanButton" class="secondary-button" data-i18n="scan">Escanear</button>
+            <div><strong id="previewBytes">0 MB</strong><span data-i18n="availableToFree"> disponibles para liberar</span></div>
+          </div>
+          <div class="scanner-summary">
+            <div>
+              <span data-i18n="scanImpact">Impacto del escaneo</span>
+              <strong id="scanImpact">0%</strong>
+            </div>
+            <div class="impact-meter"><span id="scanImpactBar"></span></div>
+          </div>
+          <div id="categoryList" class="category-list"></div>
+        </section>
+
+        <section id="schedule" class="view narrow">
+          <div class="settings-group">
+            <label class="switch-row">
+              <span data-i18n="automaticCleanup">Limpieza automatica</span>
+              <input id="scheduleEnabled" type="checkbox" />
+            </label>
+            <label>
+              <span data-i18n="frequency">Frecuencia</span>
+              <select id="frequency">
+                <option value="daily" data-i18n="daily">Diaria</option>
+                <option value="weekly" data-i18n="weekly">Semanal</option>
+                <option value="monthly" data-i18n="monthly">Mensual</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section id="history" class="view">
+          <div class="section-head">
+            <h2 data-i18n="lastTenCleanups">Ultimas 10 limpiezas</h2>
+            <button id="clearHistory" class="ghost-button" data-i18n="clearHistory">Borrar historial</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+
+        <section id="settings" class="view narrow">
+          <div class="settings-group">
+            <label>
+              <span data-i18n="theme">Tema</span>
+              <select id="theme">
+                <option value="dark" data-i18n="dark">Oscuro</option>
+                <option value="light" data-i18n="light">Claro</option>
+              </select>
+            </label>
+            <label class="switch-row">
+              <span data-i18n="autoStart">Auto-inicio con el sistema</span>
+              <input id="autoStart" type="checkbox" />
+            </label>
+            <label>
+              <span data-i18n="language">Idioma</span>
+              <select id="language">
+                <option value="es">Espanol</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+            <div class="update-panel">
+              <div>
+                <span data-i18n="updates">Actualizaciones</span>
+                <strong id="updateStatus">--</strong>
+                <p id="updateDetail"></p>
+              </div>
+              <div class="update-progress"><span id="updateProgress"></span></div>
+              <div class="update-actions">
+                <button id="checkUpdates" class="secondary-button" data-i18n="checkUpdates">Buscar actualizaciones</button>
+                <button id="installUpdate" class="primary-button hidden" data-i18n="installUpdate">Instalar ahora</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

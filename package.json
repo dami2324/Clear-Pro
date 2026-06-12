@@ -1,0 +1,74 @@
+{
+  "name": "clearpro",
+  "version": "1.0.0",
+  "description": "ClearPro - limpiador de PC/Mac y liberador de espacio para Windows y macOS.",
+  "main": "src/main/main.js",
+  "author": "ClearPro",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win nsis",
+    "build:mac": "electron-builder --mac dmg",
+    "dist": "electron-builder -mw"
+  },
+  "dependencies": {
+    "electron-log": "^5.1.7",
+    "electron-notifications": "^1.0.0",
+    "electron-store": "^8.2.0",
+    "electron-updater": "^6.1.8",
+    "node-schedule": "^2.1.1"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.clearpro.desktop",
+    "productName": "ClearPro",
+    "asar": true,
+    "compression": "maximum",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "ClearPro-Setup-${version}.${ext}",
+      "icon": "src/assets/icon.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "src/assets/icon.png",
+      "category": "public.app-category.utilities",
+      "artifactName": "ClearPro-${version}.${ext}"
+    },
+    "dmg": {
+      "sign": false
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "dami2324",
+        "repo": "Clear-Pro"
+      }
+    ]
+  }
+}
