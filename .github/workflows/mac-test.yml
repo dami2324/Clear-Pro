@@ -8,11 +8,11 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Download 1.0.2 DMG
+        env:
+          GH_TOKEN: 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
         run: |
-          curl -L -H "Authorization: token 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" \
-               -H "Accept: application/octet-stream" \
-               $(curl -s -H "Authorization: token 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" https://api.github.com/repos/dami2324/Clear-Pro/releases/tags/v1.0.2 | grep browser_download_url | grep '\.dmg"' | cut -d '"' -f 4) \
-               -o ClearPro.dmg
+          gh release download v1.0.2 -R dami2324/Clear-Pro -p "*.dmg"
+          mv *.dmg ClearPro.dmg
                
       - name: Install Application
         run: |
