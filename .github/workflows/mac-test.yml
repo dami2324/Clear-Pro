@@ -1,0 +1,35 @@
+name: macOS Installation Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-mac:
+    runs-on: macos-latest
+    steps:
+      - name: Download 1.0.2 DMG
+        run: |
+          curl -L -H "Authorization: token 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" \
+               -H "Accept: application/octet-stream" \
+               $(curl -s -H "Authorization: token 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" https://api.github.com/repos/dami2324/Clear-Pro/releases/tags/v1.0.2 | grep browser_download_url | grep '\.dmg"' | cut -d '"' -f 4) \
+               -o ClearPro.dmg
+               
+      - name: Install Application
+        run: |
+          hdiutil attach ClearPro.dmg
+          cp -R "/Volumes/ClearPro 1.0.2/ClearPro.app" /Applications/
+          hdiutil detach "/Volumes/ClearPro 1.0.2"
+          
+      - name: Run Application
+        run: |
+          open /Applications/ClearPro.app
+          sleep 15
+          
+      - name: Take Screenshot
+        run: screencapture -x screenshot.png
+        
+      - name: Upload Screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-screenshot
+          path: screenshot.png
