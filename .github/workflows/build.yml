@@ -32,9 +32,18 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Enable Developer Mode (Windows only)
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" /t REG_DWORD /f /v "AllowDevelopmentWithoutDevLicense" /d "1"
+
       - name: Build & Publish (Windows)
         if: matrix.os == 'windows-latest'
-        run: npx electron-builder --win nsis --publish always
+        shell: powershell
+        run: |
+          $env:ELECTRON_BUILDER_CACHE = Join-Path (Get-Location) ".cache\electron-builder"
+          npx electron-builder --win nsis --publish always
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

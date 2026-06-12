@@ -42,7 +42,7 @@
         "nsis"
       ],
       "artifactName": "ClearPro-Setup-${version}.${ext}",
-      "icon": "src/assets/icon.png",
+      "icon": "src/assets/icon.ico",
       "signAndEditExecutable": false
     },
     "nsis": {

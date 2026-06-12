@@ -235,12 +235,54 @@ async function checkForUpdates() {
     return updateState;
   }
 
-  try {
-    await autoUpdater.checkForUpdates();
-  } catch (error) {
-    setUpdateState({ status: 'error', message: 'error', error: error.message || String(error), percent: 0 });
-  }
-  return updateState;
+  return new Promise((resolve) => {
+    let resolved = false;
+
+    const done = (status, patch) => {
+      if (resolved) return;
+      resolved = true;
+
+      autoUpdater.removeListener('update-available', onAvailable);
+      autoUpdater.removeListener('update-not-available', onNotAvailable);
+      autoUpdater.removeListener('error', onError);
+
+      setUpdateState({ status, ...patch });
+      resolve(updateState);
+    };
+
+    const onAvailable = (info) => {
+      done('available', { message: 'available', version: info.version, percent: 0, error: null });
+    };
+
+    const onNotAvailable = (info) => {
+      done('not-available', { message: 'notAvailable', version: info.version || null, percent: 0, error: null });
+    };
+
+    const onError = (error) => {
+      const errorMsg = error.message || String(error);
+      if (errorMsg.includes('404') || errorMsg.includes('statusCode: 404') || errorMsg.includes('ERR_NAME_NOT_RESOLVED')) {
+        done('not-available', { message: 'notAvailable', version: null, percent: 0, error: null });
+      } else {
+        done('error', { message: 'error', error: errorMsg, percent: 0 });
+      }
+    };
+
+    autoUpdater.once('update-available', onAvailable);
+    autoUpdater.once('update-not-available', onNotAvailable);
+    autoUpdater.once('error', onError);
+
+    setUpdateState({ status: 'checking', message: 'checking', percent: 0, error: null });
+
+    autoUpdater.checkForUpdates().catch((err) => {
+      onError(err);
+    });
+
+    setTimeout(() => {
+      if (!resolved) {
+        done('not-available', { message: 'notAvailable', version: null, percent: 0, error: null });
+      }
+    }, 8000);
+  });
 }
 
 app.whenReady().then(() => {
