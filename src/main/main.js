@@ -194,6 +194,7 @@ function configureAutoUpdater() {
 
 function getState() {
   return {
+    version: app.getVersion(),
     theme: store.get('theme'),
     language: store.get('language'),
     autoStart: store.get('autoStart'),
@@ -301,7 +302,7 @@ app.whenReady().then(() => {
       const scan = await cleaner.scanSystem();
       const result = await cleaner.cleanScan(scan);
       const entry = recordCleanup(result);
-      notifications.showCleanupComplete(result.freedBytes, store.get('language'));
+      notifications.showCleanupComplete(result.freedBytes, result.deletedFiles, store.get('language'));
       mainWindow?.webContents.send('clearpro:cleanup-complete', { entry, state: getState() });
       return result;
     }
@@ -333,7 +334,7 @@ ipcMain.handle('cleaner:scan', () => cleaner.scanSystem());
 ipcMain.handle('cleaner:clean', async (_event, scan) => {
   const result = await cleaner.cleanScan(scan);
   const entry = recordCleanup(result);
-  notifications.showCleanupComplete(result.freedBytes, store.get('language'));
+  notifications.showCleanupComplete(result.freedBytes, result.deletedFiles, store.get('language'));
   return { result, entry, state: getState() };
 });
 

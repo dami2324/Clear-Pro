@@ -474,6 +474,23 @@ body.light .update-panel {
   display: block;
 }
 
+.category-check {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: start;
+  gap: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.category-check input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
 .category-card strong,
 .history-item strong {
   font-size: 15px;

@@ -1,6 +1,7 @@
 const state = {
   app: null,
   scan: null,
+  selectedCategories: {},
   disk: null,
   updater: null,
   currentView: 'dashboard'
@@ -55,6 +56,7 @@ const i18n = {
     deleting: 'Eliminando archivos seguros...',
     completed: 'Limpieza completada',
     noFiles: 'No se encontraron archivos para limpiar.',
+    noSelectedCategories: 'Selecciona al menos una categoria para limpiar.',
     recentFreed: 'Liberado reciente',
     junkByCategory: 'Basura por categoria',
     scanImpact: 'Impacto del escaneo',
@@ -72,6 +74,7 @@ const i18n = {
     updateError: 'No se pudo buscar actualizaciones.',
     updateDevMode: 'Las actualizaciones se prueban en la app empaquetada.',
     versionLabel: 'Version',
+    currentVersion: 'Version actual',
     categories: {
       'system-temp': 'Temporales del sistema',
       'browser-cache': 'Cache de navegadores',
@@ -128,6 +131,7 @@ const i18n = {
     deleting: 'Deleting safe files...',
     completed: 'Cleanup completed',
     noFiles: 'No files found to clean.',
+    noSelectedCategories: 'Select at least one category to clean.',
     recentFreed: 'Recent freed space',
     junkByCategory: 'Junk by category',
     scanImpact: 'Scan impact',
@@ -145,6 +149,7 @@ const i18n = {
     updateError: 'Could not check for updates.',
     updateDevMode: 'Updates are tested in the packaged app.',
     versionLabel: 'Version',
+    currentVersion: 'Current version',
     categories: {
       'system-temp': 'System temporary files',
       'browser-cache': 'Browser cache',
@@ -194,6 +199,21 @@ function categoryName(category) {
   return t(`categories.${category.id}`) || category.label;
 }
 
+function getSelectedScan() {
+  if (!state.scan) return null;
+  const categories = state.scan.categories.filter((category) => state.selectedCategories[category.id] !== false);
+  const totalBytes = categories.reduce((sum, category) => sum + category.bytes, 0);
+  const totalFiles = categories.reduce((sum, category) => sum + category.count, 0);
+  return { ...state.scan, categories, totalBytes, totalFiles };
+}
+
+function resetSelectedCategories(scan) {
+  state.selectedCategories = {};
+  (scan?.categories || []).forEach((category) => {
+    state.selectedCategories[category.id] = true;
+  });
+}
+
 function renderState() {
   if (!state.app) return;
   document.body.classList.toggle('light', state.app.theme === 'light');
@@ -224,7 +244,7 @@ function renderDisk() {
   $('#diskLabel').textContent = `${percent}% ${t('used')}`;
   $('#diskUsed').style.width = `${percent}%`;
   $('#diskBefore').textContent = `${t('before')}: ${formatBytes(state.disk.free)} ${t('free')}`;
-  const preview = state.scan?.totalBytes || 0;
+  const preview = getSelectedScan()?.totalBytes || 0;
   $('#diskAfter').textContent = `${t('after')}: ${formatBytes(state.disk.free + preview)} ${t('free')}`;
 }
 
@@ -240,32 +260,45 @@ function renderScan() {
     return;
   }
 
-  const impact = Math.max(2, Math.min(100, Math.round((scan.totalBytes / (1024 ** 3)) * 18)));
+  const selectedScan = getSelectedScan();
+  const selectedBytes = selectedScan?.totalBytes || 0;
+  const selectedFiles = selectedScan?.totalFiles || 0;
+  const impact = selectedBytes ? Math.max(2, Math.min(100, Math.round((selectedBytes / (1024 ** 3)) * 18))) : 0;
   $('#healthScore').textContent = scan.healthScore;
   $('#sidebarScore').textContent = scan.healthScore;
   $('#healthRing').style.background = `conic-gradient(var(--primary) ${scan.healthScore}%, var(--surface-2) 0)`;
   $('#scanSummary').textContent = template(t('foundSummary'), {
-    files: scan.totalFiles,
-    bytes: formatBytes(scan.totalBytes)
+    files: selectedFiles,
+    bytes: formatBytes(selectedBytes)
   });
-  $('#previewBytes').textContent = formatBytes(scan.totalBytes);
+  $('#previewBytes').textContent = formatBytes(selectedBytes);
   $('#scanImpact').textContent = `${impact}%`;
   $('#scanImpactBar').style.width = `${impact}%`;
 
   const maxBytes = Math.max(...scan.categories.map((category) => category.bytes), 1);
   $('#categoryList').innerHTML = scan.categories.map((category, index) => {
     const percent = Math.round((category.bytes / maxBytes) * 100);
+    const checked = state.selectedCategories[category.id] !== false ? 'checked' : '';
     return `
       <article class="category-card">
-        <div>
-          <strong>${categoryName(category)}</strong>
-          <p>${template(t('filesFound'), { count: category.count })}</p>
-          <div class="category-meter"><span style="width:${percent}%; background:${chartColors[index % chartColors.length]}"></span></div>
-        </div>
+        <label class="category-check">
+          <input type="checkbox" data-category-id="${category.id}" ${checked} />
+          <div>
+            <strong>${categoryName(category)}</strong>
+            <p>${template(t('filesFound'), { count: category.count })}</p>
+            <div class="category-meter"><span style="width:${percent}%; background:${chartColors[index % chartColors.length]}"></span></div>
+          </div>
+        </label>
         <strong>${formatBytes(category.bytes)}</strong>
       </article>
     `;
   }).join('');
+  document.querySelectorAll('[data-category-id]').forEach((checkbox) => {
+    checkbox.addEventListener('change', (event) => {
+      state.selectedCategories[event.target.dataset.categoryId] = event.target.checked;
+      renderScan();
+    });
+  });
   renderDisk();
   renderCharts();
 }
@@ -303,6 +336,7 @@ function renderUpdater() {
   };
   const label = t(statusMap[updater.status] || 'updateIdle');
   const detail = [
+    state.app?.version ? `${t('currentVersion')}: ${state.app.version}` : '',
     updater.version ? `${t('versionLabel')}: ${updater.version}` : '',
     updater.error || ''
   ].filter(Boolean).join(' - ');
@@ -390,7 +424,7 @@ function renderCategoryDonut() {
   const canvas = $('#categoryDonut');
   if (!canvas) return;
   const { ctx, width, height } = setupCanvas(canvas);
-  const categories = state.scan?.categories || [];
+  const categories = getSelectedScan()?.categories || [];
   const values = categories.map((category) => category.bytes);
   const total = values.reduce((sum, value) => sum + value, 0);
   $('#categoryTotal').textContent = formatBytes(total);
@@ -461,6 +495,7 @@ async function runScan() {
   setProgress(true, 42, t('searching'));
   await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 100)));
   state.scan = await window.clearpro.scan();
+  resetSelectedCategories(state.scan);
   setProgress(true, 100, t('previewReady'));
   renderScan();
   await new Promise((resolve) => setTimeout(resolve, 600));
@@ -470,9 +505,11 @@ async function runScan() {
 }
 
 async function cleanNow() {
-  const scan = state.scan || await runScan();
-  if (!scan.totalFiles) {
-    setProgress(true, 100, t('noFiles'));
+  if (!state.scan) await runScan();
+  const scan = getSelectedScan();
+  if (!scan || !scan.totalFiles) {
+    const hasFiles = Boolean(state.scan?.totalFiles);
+    setProgress(true, 100, hasFiles ? t('noSelectedCategories') : t('noFiles'));
     await new Promise((resolve) => setTimeout(resolve, 500));
     setProgress(false);
     return;
@@ -480,7 +517,15 @@ async function cleanNow() {
   setProgress(true, 35, t('deleting'));
   const response = await window.clearpro.clean(scan);
   state.app = response.state;
-  state.scan = { ...scan, totalBytes: 0, totalFiles: 0, categories: scan.categories.map((category) => ({ ...category, bytes: 0, count: 0, files: [] })) };
+  const cleanedIds = new Set(scan.categories.map((category) => category.id));
+  state.scan = {
+    ...state.scan,
+    categories: state.scan.categories.map((category) => cleanedIds.has(category.id)
+      ? { ...category, bytes: 0, count: 0, files: [] }
+      : category)
+  };
+  state.scan.totalBytes = state.scan.categories.reduce((sum, category) => sum + category.bytes, 0);
+  state.scan.totalFiles = state.scan.categories.reduce((sum, category) => sum + category.count, 0);
   setProgress(true, 100, t('completed'));
   renderState();
   await refreshDisk();

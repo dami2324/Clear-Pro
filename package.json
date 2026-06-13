@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "electron-log": "^5.1.7",
-    "electron-notifications": "^1.0.0",
     "electron-store": "^8.2.0",
     "electron-updater": "^6.1.8",
     "node-schedule": "^2.1.1"
@@ -42,7 +41,8 @@
         "nsis"
       ],
       "artifactName": "ClearPro-Setup-${version}.${ext}",
-      "icon": "src/assets/icon.ico"
+      "icon": "src/assets/icon.ico",
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
