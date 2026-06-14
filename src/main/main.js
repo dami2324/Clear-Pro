@@ -18,6 +18,11 @@ const store = new Store({
   }
 });
 
+// Fix Windows Notification App Name
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.clearpro.desktop');
+}
+
 let mainWindow;
 let updateState = {
   status: 'idle',
