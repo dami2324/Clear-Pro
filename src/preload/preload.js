@@ -2,12 +2,14 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('clearpro', {
   getState: () => ipcRenderer.invoke('app:get-state'),
-  getDisk: () => ipcRenderer.invoke('app:get-disk'),
+  getDisks: () => ipcRenderer.invoke('app:get-disks'),
+  getDisk: (diskRoot) => ipcRenderer.invoke('app:get-disk', diskRoot),
   getUpdaterState: () => ipcRenderer.invoke('updater:get-state'),
   checkForUpdates: () => ipcRenderer.invoke('updater:check'),
   installUpdate: () => ipcRenderer.invoke('updater:install'),
-  scan: () => ipcRenderer.invoke('cleaner:scan'),
+  scan: (options) => ipcRenderer.invoke('cleaner:scan', options),
   clean: (scan) => ipcRenderer.invoke('cleaner:clean', scan),
+  showInFolder: (filePath) => ipcRenderer.invoke('file:show-in-folder', filePath),
   updateSettings: (patch) => ipcRenderer.invoke('settings:update', patch),
   clearHistory: () => ipcRenderer.invoke('history:clear'),
   onCleanupComplete: (callback) => {

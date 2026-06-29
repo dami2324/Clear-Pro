@@ -11,6 +11,9 @@ on:
 permissions:
   contents: write
 
+env:
+  APP_VERSION: 1.0.7
+
 jobs:
   release:
     runs-on: ${{ matrix.os }}
@@ -47,8 +50,76 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Upload Windows installer artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClearPro-Windows-${{ github.ref_name }}
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/latest.yml
+
+      - name: Package Windows SIC
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          $sicRoot = "SIC-Windows-ClearPro-${env:APP_VERSION}"
+          New-Item -ItemType Directory -Force -Path $sicRoot | Out-Null
+          Copy-Item "dist\*.exe" $sicRoot
+          Copy-Item "Autoria y Licencia.pdf" $sicRoot
+          Copy-Item "Manual de Instrucciones.pdf" $sicRoot
+          Compress-Archive -Path $sicRoot -DestinationPath "$sicRoot.zip" -Force
+
+      - name: Upload Windows SIC artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SIC-Windows-ClearPro-${{ env.APP_VERSION }}
+          path: SIC-Windows-ClearPro-${{ env.APP_VERSION }}.zip
+
+      - name: Attach Windows SIC to release
+        if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" "SIC-Windows-ClearPro-${env:APP_VERSION}.zip" --clobber
+
       - name: Build & Publish (macOS)
         if: matrix.os == 'macos-latest'
         run: npx electron-builder --mac dmg --publish always
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload macOS installer artifact
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClearPro-macOS-${{ github.ref_name }}
+          path: |
+            dist/*.dmg
+            dist/*.blockmap
+            dist/latest-mac.yml
+
+      - name: Package macOS SIC
+        if: matrix.os == 'macos-latest'
+        run: |
+          sic_root="SIC-macOS-ClearPro-${APP_VERSION}"
+          mkdir -p "$sic_root"
+          cp dist/*.dmg "$sic_root/"
+          cp "Autoria y Licencia.pdf" "$sic_root/"
+          cp "Manual de Instrucciones.pdf" "$sic_root/"
+          ditto -c -k --sequesterRsrc --keepParent "$sic_root" "$sic_root.zip"
+
+      - name: Upload macOS SIC artifact
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SIC-macOS-ClearPro-${{ env.APP_VERSION }}
+          path: SIC-macOS-ClearPro-${{ env.APP_VERSION }}.zip
+
+      - name: Attach macOS SIC to release
+        if: matrix.os == 'macos-latest' && startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" "SIC-macOS-ClearPro-${APP_VERSION}.zip" --clobber

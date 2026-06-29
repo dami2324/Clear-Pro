@@ -1,35 +1,40 @@
-﻿name: macOS Installation Test
+name: macOS Installation Test
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release tag to test'
+        required: true
+        default: 'v1.0.7'
 
 jobs:
   test-mac:
     runs-on: macos-latest
     steps:
-      - name: Download 1.0.6 DMG
+      - name: Download release DMG
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download v1.0.6 -R dami2324/Clear-Pro -p "*.dmg"
+          gh release download "${{ inputs.version }}" -R dami2324/Clear-Pro -p "*.dmg"
           mv *.dmg ClearPro.dmg
-               
+
       - name: Install Application
         run: |
           hdiutil attach ClearPro.dmg
           cp -R /Volumes/ClearPro*/ClearPro.app /Applications/
           hdiutil detach /Volumes/ClearPro*
-          
+
       - name: Run Application
         run: |
           open /Applications/ClearPro.app
           sleep 15
-          
+
       - name: Take Screenshot
         run: screencapture -x screenshot.png
-        
+
       - name: Upload Screenshot
         uses: actions/upload-artifact@v4
         with:
-          name: macos-screenshot
+          name: macos-screenshot-${{ inputs.version }}
           path: screenshot.png

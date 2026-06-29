@@ -1,6 +1,6 @@
 {
   "name": "clearpro",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Limpiador de PC",
   "main": "src/main/main.js",
   "author": "ClearPro",
@@ -9,6 +9,8 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
+    "serve:renderer": "node scripts/dev-server.js",
+    "dev:localhost": "set CLEARPRO_DEV_URL=http://localhost:4173/renderer/index.html&& electron .",
     "build": "electron-builder",
     "build:win": "electron-builder --win nsis",
     "build:mac": "electron-builder --mac dmg",

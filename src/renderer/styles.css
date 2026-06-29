@@ -82,8 +82,11 @@ body.light .sidebar {
 .brand-mark {
   width: 46px;
   height: 46px;
-  border-radius: 12px;
-  box-shadow: 0 16px 34px rgba(0, 102, 255, 0.28);
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  display: block;
+  object-fit: contain;
 }
 
 .brand strong {
@@ -100,7 +103,8 @@ body.light .sidebar {
 .scanner-summary span,
 .category-card p,
 .history-item p,
-.legend-item small {
+.legend-item small,
+.category-description {
   color: var(--muted);
   font-size: 13px;
 }
@@ -233,6 +237,7 @@ h2 {
 .progress-wrap,
 .chart-card,
 .scanner-summary,
+.scanner-breakdown,
 .update-panel {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.055), transparent 38%),
@@ -251,6 +256,7 @@ body.light .history-item,
 body.light .progress-wrap,
 body.light .chart-card,
 body.light .scanner-summary,
+body.light .scanner-breakdown,
 body.light .update-panel {
   background:
     linear-gradient(145deg, rgba(0, 102, 255, 0.06), transparent 42%),
@@ -296,8 +302,18 @@ body.light .update-panel {
 .progress-wrap,
 .chart-card,
 .scanner-summary,
+.scanner-breakdown,
 .update-panel {
   padding: 24px;
+}
+
+.disk-select-row {
+  margin-top: 16px;
+}
+
+.disk-select-row span {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .disk-bar,
@@ -403,13 +419,94 @@ body.light .update-panel {
 }
 
 .progress-wrap,
-.scanner-summary {
+.scanner-summary,
+.scanner-breakdown {
   margin-top: 18px;
 }
 
 .scanner-summary {
   display: grid;
   gap: 14px;
+}
+
+.scanner-breakdown {
+  display: grid;
+  gap: 14px;
+}
+
+.scanner-breakdown-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.scanner-breakdown-head span,
+.scanner-metric span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.scanner-breakdown-head strong {
+  font-size: 18px;
+}
+
+.scanner-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.scanner-metric {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.scanner-metric strong {
+  overflow: hidden;
+  font-size: 19px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scanner-metric span {
+  min-height: 34px;
+  line-height: 1.25;
+}
+
+.scanner-metric-bar {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.scanner-metric-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.scanner-metric.success .scanner-metric-bar i {
+  background: var(--success);
+}
+
+.scanner-metric.warning .scanner-metric-bar i {
+  background: var(--warning);
+}
+
+.scanner-metric.blue .scanner-metric-bar i {
+  background: var(--primary-2);
+}
+
+.scanner-metric.muted .scanner-metric-bar i {
+  background: var(--muted);
 }
 
 .update-panel {
@@ -448,6 +545,17 @@ body.light .update-panel {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.scanner-action-stack {
+  display: grid;
+  gap: 8px;
+}
+
+#scannerDiskLabel {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .hidden {
@@ -496,6 +604,100 @@ body.light .update-panel {
   font-size: 15px;
 }
 
+.review-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--warning);
+  font-size: 11px;
+  font-weight: 800;
+  vertical-align: middle;
+}
+
+.large-file-list {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.large-file-list > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.large-file-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.large-file-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--primary);
+}
+
+.large-file-row div {
+  min-width: 0;
+}
+
+.large-file-row strong,
+.large-file-row small {
+  display: block;
+}
+
+.large-file-row small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-description {
+  display: block;
+  margin: 4px 0 6px;
+  line-height: 1.35;
+}
+
+.folder-button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(0, 102, 255, 0.12);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
+.folder-button:hover {
+  background: rgba(0, 102, 255, 0.2);
+}
+
+.folder-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.more-files {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .category-meter {
   height: 8px;
   margin-top: 12px;
@@ -537,7 +739,8 @@ input[type="checkbox"] {
 
 @media (max-width: 1080px) {
   .analytics-grid,
-  .hero-grid {
+  .hero-grid,
+  .scanner-metric-grid {
     grid-template-columns: 1fr;
   }
 }

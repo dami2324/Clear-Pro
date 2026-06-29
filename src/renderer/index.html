@@ -12,7 +12,7 @@
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <img class="brand-mark" src="../assets/icon.png" alt="ClearPro" />
+          <img class="brand-mark" src="../assets/icon-transparent.png" alt="ClearPro" />
           <div>
             <strong>ClearPro</strong>
             <span data-i18n="brandSubtitle">Cleaner</span>
@@ -54,6 +54,10 @@
                 <span data-i18n="diskUsage">Uso del disco</span>
                 <strong id="diskLabel">Calculando...</strong>
               </div>
+              <label class="disk-select-row">
+                <span data-i18n="diskSelector">Disco</span>
+                <select id="diskSelect"></select>
+              </label>
               <div class="disk-bar"><span id="diskUsed"></span></div>
               <div class="disk-meta">
                 <span id="diskBefore">Antes: --</span>
@@ -93,7 +97,10 @@
 
         <section id="scanner" class="view">
           <div class="scanner-actions">
-            <button id="scanButton" class="secondary-button" data-i18n="scan">Escanear</button>
+            <div class="scanner-action-stack">
+              <button id="scanButton" class="secondary-button" data-i18n="scan">Escanear</button>
+              <span id="scannerDiskLabel">Disco seleccionado: --</span>
+            </div>
             <div><strong id="previewBytes">0 MB</strong><span data-i18n="availableToFree"> disponibles para liberar</span></div>
           </div>
           <div class="scanner-summary">
@@ -103,6 +110,7 @@
             </div>
             <div class="impact-meter"><span id="scanImpactBar"></span></div>
           </div>
+          <div id="scannerBreakdown" class="scanner-breakdown"></div>
           <div id="categoryList" class="category-list"></div>
         </section>
 

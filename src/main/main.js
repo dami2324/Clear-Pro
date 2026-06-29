@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, nativeTheme, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, nativeTheme, Menu, shell } = require('electron');
 const path = require('path');
 const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
@@ -20,7 +20,7 @@ const store = new Store({
 
 // Fix Windows Notification App Name
 if (process.platform === 'win32') {
-  app.setAppUserModelId('com.clearpro.desktop');
+  app.setAppUserModelId(process.env.CLEARPRO_DEV_URL ? 'com.clearpro.desktop.dev.largeicon' : 'com.clearpro.desktop');
 }
 
 let mainWindow;
@@ -146,7 +146,7 @@ function createWindow() {
     minHeight: 660,
     title: 'ClearPro',
     backgroundColor: '#0b1020',
-    icon: path.join(__dirname, '../assets/icon.png'),
+    icon: path.join(__dirname, process.platform === 'win32' ? '../assets/icon-taskbar-large.ico' : '../assets/icon-taskbar-large.png'),
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
@@ -155,7 +155,11 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+  if (process.env.CLEARPRO_DEV_URL) {
+    mainWindow.loadURL(process.env.CLEARPRO_DEV_URL);
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+  }
   mainWindow.webContents.once('did-finish-load', () => {
     mainWindow?.webContents.send('updater:status', updateState);
   });
@@ -326,7 +330,8 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.handle('app:get-state', () => getState());
-ipcMain.handle('app:get-disk', () => cleaner.getDiskSummary());
+ipcMain.handle('app:get-disks', () => cleaner.getAvailableDisks());
+ipcMain.handle('app:get-disk', (_event, diskRoot) => cleaner.getDiskSummary(diskRoot));
 ipcMain.handle('updater:get-state', () => updateState);
 ipcMain.handle('updater:check', () => checkForUpdates());
 ipcMain.handle('updater:install', () => {
@@ -335,12 +340,24 @@ ipcMain.handle('updater:install', () => {
   }
   return updateState;
 });
-ipcMain.handle('cleaner:scan', () => cleaner.scanSystem());
+ipcMain.handle('cleaner:scan', (_event, options) => cleaner.scanSystem(options));
 ipcMain.handle('cleaner:clean', async (_event, scan) => {
   const result = await cleaner.cleanScan(scan);
   const entry = recordCleanup(result);
   notifications.showCleanupComplete(result.freedBytes, result.deletedFiles, store.get('language'));
   return { result, entry, state: getState() };
+});
+ipcMain.handle('file:show-in-folder', async (_event, filePath) => {
+  if (!filePath || String(filePath).startsWith('RecycleBin::')) {
+    return { ok: false, reason: 'unsupported' };
+  }
+
+  try {
+    shell.showItemInFolder(filePath);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, reason: error.message || String(error) };
+  }
 });
 
 ipcMain.handle('settings:update', (_event, patch) => {
