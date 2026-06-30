@@ -69,7 +69,7 @@ jobs:
           Copy-Item "dist\*.exe" $zipRoot
           Copy-Item "Autoria y Licencia.pdf" $zipRoot
           Copy-Item "Manual de Instrucciones.pdf" $zipRoot
-          Compress-Archive -Path $zipRoot -DestinationPath "$zipRoot.zip" -Force
+          Compress-Archive -Path "$zipRoot\*" -DestinationPath "$zipRoot.zip" -Force
 
       - name: Upload Windows ZIP artifact
         if: matrix.os == 'windows-latest'
@@ -109,7 +109,7 @@ jobs:
           cp dist/*.dmg "$zip_root/"
           cp "Autoria y Licencia.pdf" "$zip_root/"
           cp "Manual de Instrucciones.pdf" "$zip_root/"
-          ditto -c -k --sequesterRsrc --keepParent "$zip_root" "$zip_root.zip"
+          (cd "$zip_root" && zip -r "../$zip_root.zip" .)
 
       - name: Upload macOS ZIP artifact
         if: matrix.os == 'macos-latest'
