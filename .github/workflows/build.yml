@@ -60,30 +60,30 @@ jobs:
             dist/*.blockmap
             dist/latest.yml
 
-      - name: Package Windows SIC
+      - name: Package Windows ZIP folder
         if: matrix.os == 'windows-latest'
         shell: powershell
         run: |
-          $sicRoot = "SIC-Windows-ClearPro-${env:APP_VERSION}"
-          New-Item -ItemType Directory -Force -Path $sicRoot | Out-Null
-          Copy-Item "dist\*.exe" $sicRoot
-          Copy-Item "Autoria y Licencia.pdf" $sicRoot
-          Copy-Item "Manual de Instrucciones.pdf" $sicRoot
-          Compress-Archive -Path $sicRoot -DestinationPath "$sicRoot.zip" -Force
+          $zipRoot = "ClearPro-Windows-${env:APP_VERSION}"
+          New-Item -ItemType Directory -Force -Path $zipRoot | Out-Null
+          Copy-Item "dist\*.exe" $zipRoot
+          Copy-Item "Autoria y Licencia.pdf" $zipRoot
+          Copy-Item "Manual de Instrucciones.pdf" $zipRoot
+          Compress-Archive -Path $zipRoot -DestinationPath "$zipRoot.zip" -Force
 
-      - name: Upload Windows SIC artifact
+      - name: Upload Windows ZIP artifact
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: SIC-Windows-ClearPro-${{ env.APP_VERSION }}
-          path: SIC-Windows-ClearPro-${{ env.APP_VERSION }}.zip
+          name: ClearPro-Windows-${{ env.APP_VERSION }}
+          path: ClearPro-Windows-${{ env.APP_VERSION }}.zip
 
-      - name: Attach Windows SIC to release
+      - name: Attach Windows ZIP folder to release
         if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
         shell: powershell
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.ref_name }}" "SIC-Windows-ClearPro-${env:APP_VERSION}.zip" --clobber
+        run: gh release upload "${{ github.ref_name }}" "ClearPro-Windows-${env:APP_VERSION}.zip" --clobber
 
       - name: Build & Publish (macOS)
         if: matrix.os == 'macos-latest'
@@ -101,25 +101,25 @@ jobs:
             dist/*.blockmap
             dist/latest-mac.yml
 
-      - name: Package macOS SIC
+      - name: Package macOS ZIP folder
         if: matrix.os == 'macos-latest'
         run: |
-          sic_root="SIC-macOS-ClearPro-${APP_VERSION}"
-          mkdir -p "$sic_root"
-          cp dist/*.dmg "$sic_root/"
-          cp "Autoria y Licencia.pdf" "$sic_root/"
-          cp "Manual de Instrucciones.pdf" "$sic_root/"
-          ditto -c -k --sequesterRsrc --keepParent "$sic_root" "$sic_root.zip"
+          zip_root="ClearPro-macOS-${APP_VERSION}"
+          mkdir -p "$zip_root"
+          cp dist/*.dmg "$zip_root/"
+          cp "Autoria y Licencia.pdf" "$zip_root/"
+          cp "Manual de Instrucciones.pdf" "$zip_root/"
+          ditto -c -k --sequesterRsrc --keepParent "$zip_root" "$zip_root.zip"
 
-      - name: Upload macOS SIC artifact
+      - name: Upload macOS ZIP artifact
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: SIC-macOS-ClearPro-${{ env.APP_VERSION }}
-          path: SIC-macOS-ClearPro-${{ env.APP_VERSION }}.zip
+          name: ClearPro-macOS-${{ env.APP_VERSION }}
+          path: ClearPro-macOS-${{ env.APP_VERSION }}.zip
 
-      - name: Attach macOS SIC to release
+      - name: Attach macOS ZIP folder to release
         if: matrix.os == 'macos-latest' && startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.ref_name }}" "SIC-macOS-ClearPro-${APP_VERSION}.zip" --clobber
+        run: gh release upload "${{ github.ref_name }}" "ClearPro-macOS-${APP_VERSION}.zip" --clobber
